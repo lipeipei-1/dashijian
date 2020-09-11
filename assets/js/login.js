@@ -11,7 +11,7 @@ $(function() {
         })
         //从layui中获取form对象
     var form = layui.form
-
+    var layer = layui.layer
     form.verify({
         password: [
             /^[\S]{6,12}$/, '密码必须6到12位，且不能出现空格'
@@ -30,18 +30,57 @@ $(function() {
         //   }
 
         repassword: function(value) {
-            var psw = $('.reg-box[name=password]').val()
+            var psw = $('.reg-box [name=password]').val()
             if (psw !== value) {
                 return '两次密码不一致'
             }
         }
     })
 
+    // 注册的表单监听事件
+    $('#form_reg').on('submit', function(e) {
+            e.preventDefault()
+            $.ajax({
+                url: '/api/reguser',
+                method: 'post',
+                data: { username: $('#form_reg [name=username]').val(), password: $('#form_reg [name=password]').val() },
+                success: function(res) {
+                    if (res.status !== 0) {
+                        return layer.msg(res.message);
+                    }
+                    layer.msg("注册成功");
+                    // 模拟人的点击事件
+                    $('#link_login').click()
+                }
+            })
+        })
+        // 方法 二：
+        // $('#form_reg').on('submit', function(e) {
+        //     e.preventDefault()
+        //     $.post('http://ajax.frontend.itheima.net/api/reguser', { username: $('#form_reg [name=username]').val(), password: $('#form_reg [name=password]').val() }, function(res) {
+        //         if (res.status !== 0) {
+        //             return layer.msg(res.message);
+        //         }
+        //         layer.msg("注册成功");
+        //         // 模拟人的点击事件
+        //         $('#link_login').click()
+        //     })
+        // })
+
+
+    // 监听登录的表单事件
+    $("#form_login").submit(function(e) {
+        e.preventDefault()
+        $.post('/api/login', $(this).serialize(), function(res) {
+            if (res.status !== 0) { return layer.msg(res.message); }
+            layer.msg("登录成功");
+            localStorage.setItem('token', res.token)
+            location.href = '../../index.html'
+        })
 
 
 
-
-
+    })
 
 
 
