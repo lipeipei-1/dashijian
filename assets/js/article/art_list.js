@@ -29,6 +29,7 @@ $(function() {
     }
     var layer = layui.layer
     var form = layui.form
+    var laypage = layui.laypage
     initTable()
     initCate()
 
@@ -43,6 +44,8 @@ $(function() {
                 }
                 var htmlStr = template('tpl-table', res)
                 $('tbody').html(htmlStr)
+                    // 调用渲染分页的方法
+                renderPage(res.total)
             }
         })
     }
@@ -60,7 +63,7 @@ $(function() {
                 }
                 template('tpl-cate', res)
                 var htmlStr = template('tpl-cate', res)
-                console.log(htmlStr);
+                    // console.log(htmlStr);
 
                 $('[name=cate_id]').html(htmlStr)
                 form.render()
@@ -69,14 +72,43 @@ $(function() {
     }
     // 筛选功能
     $('#form-search').on('submit', function(e) {
-        e.preventDefault()
-        console.log('ok');
+            e.preventDefault()
+            var cate_id = $('[name=cate_id]').val()
 
-        var cate_id = $('[name=cate_id]').val()
-        console.log(cate_id);
-        var state = $('[name=state]').val()
-        q.cate_id = cate_id
-        q.state = state
-        initTable()
-    })
+            var state = $('[name=state]').val()
+            q.cate_id = cate_id
+            q.state = state
+            initTable()
+        })
+        // 定义渲染分页的方法
+    function renderPage(total) {
+        // console.log(total);
+        // 调用 laypage.render() 方法来渲染分页的结构
+        laypage.render({
+            elem: 'pageBox', // 分页容器的 Id
+            count: total, // 总数据条数
+            limit: q.pagesize, // 每页显示几条数据
+            curr: q.pagenum, // 设置默认被选中的分页
+            layout: ['count', 'limit', 'prev', 'page', 'next', 'skip'],
+            limits: [2, 3, 5, 10],
+            // 分页发生切换的时候，触发 jump 回调
+            // 触发 jump 回调的方式有两种：
+            // 1. 点击页码的时候，会触发 jump 回调
+            // 2. 只要调用了 laypage.render() 方法，就会触发 jump 回调
+            jump: function(obj, first) {
+                q.pagenum = obj.curr
+                q.pagesize = obj.limit
+                    // 可以通过 first 的值，来判断是通过哪种方式，触发的 jump 回调
+                    // 如果 first 的值为 true，证明是方式2触发的
+                    // 否则就是方式1触发的
+                if (!first) { initTable() }
+
+            }
+
+        })
+
+    }
+
+
+
 })
