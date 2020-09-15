@@ -104,11 +104,39 @@ $(function() {
                 if (!first) { initTable() }
 
             }
-
         })
-
     }
+    // 删除功能
+    $('tbody').on('click', '.delete-btn', function() {
+        var artId = $(this).attr('data-id')
+        var len = $('.delete-btn').length
+        console.log(len);
 
+        layer.confirm('是否删除文章?', { icon: 3, title: '提示' }, function(index) {
+            $.ajax({
+                url: '/my/article/delete/' + artId,
+                method: 'GET',
+                success: function(res) {
+                    console.log(res);
+
+                    if (res.status !== 0) {
+                        return layer.msg(res.message)
+                    }
+                    layer.msg('删除文章成功')
+                    if (len === 1) {
+                        q.pagenum = q.pagenum === 1 ? 1 : q.pagenum - 1
+
+                    }
+                    initTable()
+                }
+
+
+            })
+
+            layer.close(index);
+        });
+
+    })
 
 
 })
